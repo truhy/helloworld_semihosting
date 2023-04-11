@@ -1,9 +1,3 @@
-# Eclipse IDE
-.cproject
-.dep/
-.project
-.settings/
-
 # Prerequisites
 *.d
 
