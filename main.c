@@ -59,7 +59,7 @@ void semihosting_test(){
 		int input_num = (int)strtol(buffer, NULL, 10);
 
 		// Test Semihosting printf displaying a loop count to the debugger console
-		printf("Counting: ", input_num - 1);
+		printf("Counting: ");
 		fflush(stdout);
 		int i;
 		for(i = 0; i < input_num; ++i){
