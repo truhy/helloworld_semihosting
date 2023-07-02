@@ -19,16 +19,17 @@
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 	SOFTWARE.
 
-	Version: 20230319
+	Version: 20230702
 */
 #include <errno.h>
-#include <newlib_ext.h>
 #include <sys/stat.h>
 #include <sys/unistd.h>
-#ifdef PRINTF_UART
-	#include "alt_uart.h"
-	#include "hps.h"
-	#include "socal.h"
+#include "newlib_ext.h"
+#ifdef TRU_PRINTF_UART
+	// HWLIB includes
+	#include "socal/alt_uart.h"
+	#include "socal/hps.h"
+	#include "socal/socal.h"
 #endif
 
 #ifndef SEMIHOSTING
@@ -76,7 +77,7 @@
 		Re-target depending on compiler define.
 	*/
 	int _write(int file, char *ptr, int len){
-		#ifdef PRINTF_UART
+		#ifdef TRU_PRINTF_UART
 			// Re-target to UART controller
 
 			// Not stdout?
@@ -87,20 +88,20 @@
 			}
 
 			// FIFO & threshold mode enabled?
-			char fifo_th_en = (alt_read_word(ALT_UART_SFE_ADDR(DEBUG_PRINTF_UART_ADDR)) && alt_read_word(ALT_UART_STET_ADDR(DEBUG_PRINTF_UART_ADDR))) ? 1 : 0;
+			char fifo_th_en = (alt_read_word(ALT_UART_SFE_ADDR(TRU_PRINTF_UART_ADDR)) && alt_read_word(ALT_UART_STET_ADDR(TRU_PRINTF_UART_ADDR))) ? 1 : 0;
 
 			// Write input bytes to UART controller, one at a time
 			for(int i = 0; i < len; i++){
 				// Wait for the UART controller transmit to become empty (free)
 				// They are masochists - using the same bit but with the opposite logic depending on the mode set!
 				if(fifo_th_en){
-					while(alt_read_word(ALT_UART_LSR_ADDR(DEBUG_PRINTF_UART_ADDR)) & 0x00000020);  // Wait while not empty. Bit 5 of LSR reg (THRE bit), 1 = not empty, 0 = empty
+					while(alt_read_word(ALT_UART_LSR_ADDR(TRU_PRINTF_UART_ADDR)) & 0x00000020);  // Wait while not empty. Bit 5 of LSR reg (THRE bit), 1 = not empty, 0 = empty
 				}else{
-					while((alt_read_word(ALT_UART_LSR_ADDR(DEBUG_PRINTF_UART_ADDR)) & 0x00000020) == 0);  // Wait while not empty. Bit 5 of LSR reg (THRE bit), 0 = not empty, 1 = empty
+					while((alt_read_word(ALT_UART_LSR_ADDR(TRU_PRINTF_UART_ADDR)) & 0x00000020) == 0);  // Wait while not empty. Bit 5 of LSR reg (THRE bit), 0 = not empty, 1 = empty
 				}
 
 				// Write a single character to UART controller transmit holding register
-				alt_write_word(ALT_UART_RBR_THR_DLL_ADDR(DEBUG_PRINTF_UART_ADDR), ptr[i]);
+				alt_write_word(ALT_UART_RBR_THR_DLL_ADDR(TRU_PRINTF_UART_ADDR), ptr[i]);
 			}
 
 			return len;

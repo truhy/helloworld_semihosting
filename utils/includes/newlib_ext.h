@@ -19,7 +19,7 @@
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 	SOFTWARE.
 
-	Version: 20230319
+	Version: 20230619
 
 	Contains functions for some newlib stub functions to support the DE10-Nano
 	development board.
@@ -32,6 +32,6 @@
 #define NEWLIB_EXT_H_
 
 // Set the base address to the UART controller you want to use for the debug printf
-#define DEBUG_PRINTF_UART_ADDR ALT_UART0_ADDR
+#define TRU_PRINTF_UART_ADDR ALT_UART0_ADDR
 
 #endif /* NEWLIB_EXT_H_ */
