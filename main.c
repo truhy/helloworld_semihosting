@@ -9,8 +9,10 @@
 	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 	copies of the Software, and to permit persons to whom the Software is
 	furnished to do so, subject to the following conditions:
+
 	The above copyright notice and this permission notice shall be included in all
 	copies or substantial portions of the Software.
+
 	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,7 +21,7 @@
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 	SOFTWARE.
 
-	Version: 20230319
+	Version: 20230909
 	Target: Arm Cortex A9 on the DE10-Nano development board
 
 	A simple semihosting "Hello, World!" bare-metal C program for the DE10-
@@ -42,7 +44,7 @@
 	extern void initialise_monitor_handles(void);  // Reference function header from the external Semihosting library
 #endif
 
-void semihosting_test(){
+void semihosting_test(void){
 	// Test Semihosting printf displaying a message to the debugger console
 	printf("Hello, World!\n");
 
@@ -72,7 +74,7 @@ void semihosting_test(){
 	}
 }
 
-void wait_forever(){
+void wait_forever(void){
 	volatile unsigned char i = 1;
 	while(i);
 }
