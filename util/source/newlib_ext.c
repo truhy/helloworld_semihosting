@@ -21,7 +21,7 @@
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 	SOFTWARE.
 
-	Version: 20230702
+	Version: 20230923
 */
 #include <errno.h>
 #include <sys/stat.h>
@@ -94,7 +94,7 @@
 
 			// Write input bytes to UART controller, one at a time
 			for(int i = 0; i < len; i++){
-				// Wait for the UART controller transmit to become empty (free)
+				// Wait until the UART controller is ready to accept a byte in its transmit buffer, i.e. there is free space?
 				// They are masochists - using the same bit but with the opposite logic depending on the mode set!
 				if(fifo_th_en){
 					while(alt_read_word(ALT_UART_LSR_ADDR(TRU_PRINTF_UART_ADDR)) & 0x00000020);  // Wait while not empty. Bit 5 of LSR reg (THRE bit), 1 = not empty, 0 = empty
