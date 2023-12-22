@@ -21,17 +21,14 @@
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 	SOFTWARE.
 
-	Version: 20230923
+	Version: 20231201
 */
 #include <errno.h>
 #include <sys/stat.h>
 #include <sys/unistd.h>
 #include "newlib_ext.h"
 #ifdef TRU_PRINTF_UART
-	// HWLIB includes
-	#include "socal/alt_uart.h"
-	#include "socal/hps.h"
-	#include "socal/socal.h"
+	#include "c5_uart.h"
 #endif
 
 #ifndef SEMIHOSTING
@@ -89,22 +86,7 @@
 				return -1;
 			}
 
-			// FIFO & threshold mode enabled?
-			char fifo_th_en = (alt_read_word(ALT_UART_SFE_ADDR(TRU_PRINTF_UART_ADDR)) && alt_read_word(ALT_UART_STET_ADDR(TRU_PRINTF_UART_ADDR))) ? 1 : 0;
-
-			// Write input bytes to UART controller, one at a time
-			for(int i = 0; i < len; i++){
-				// Wait until the UART controller is ready to accept a byte in its transmit buffer, i.e. there is free space?
-				// They are masochists - using the same bit but with the opposite logic depending on the mode set!
-				if(fifo_th_en){
-					while(alt_read_word(ALT_UART_LSR_ADDR(TRU_PRINTF_UART_ADDR)) & 0x00000020);  // Wait while not empty. Bit 5 of LSR reg (THRE bit), 1 = not empty, 0 = empty
-				}else{
-					while((alt_read_word(ALT_UART_LSR_ADDR(TRU_PRINTF_UART_ADDR)) & 0x00000020) == 0);  // Wait while not empty. Bit 5 of LSR reg (THRE bit), 0 = not empty, 1 = empty
-				}
-
-				// Write a single character to UART controller transmit holding register
-				alt_write_word(ALT_UART_RBR_THR_DLL_ADDR(TRU_PRINTF_UART_ADDR), ptr[i]);
-			}
+			c5_uart_write_str(C5_UART0_BASE_ADDR, ptr, len);
 
 			return len;
 		#else

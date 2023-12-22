@@ -21,16 +21,32 @@
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 	SOFTWARE.
 
-	Version: 20231201
+	Version: 20231126
 
-	Contains functions for some newlib stub functions to support the DE10-Nano
-	development board.
-
-	Contains mostly minimal implementation (fake return success or failure).
-	Added in debug print to HPS UART0.
+	UART functions for Cyclone V SoC (HPS).
 */
 
-#ifndef NEWLIB_EXT_H
-#define NEWLIB_EXT_H
+#ifndef C5_UART_H
+#define C5_UART_H
+
+#include "c5_util.h"
+#include <stdint.h>
+
+// UART base registers
+#define C5_UART0_BASE_ADDR         0xffc02000UL
+// UART register offsets
+#define C5_UART_RBR_THR_DLL_OFFSET 0x0UL
+#define C5_UART_LSR_OFFSET         0x14UL
+#define C5_UART_SFE_OFFSET         0x98UL
+#define C5_UART_STET_OFFSET        0xa0UL
+// UART0 registers
+#define C5_UART0_RBR_THR_DLL_ADDR  0xffc02000UL
+#define C5_UART0_LSR_ADDR          0xffc02014UL
+#define C5_UART0_SFE_ADDR          0xffc02098UL
+#define C5_UART0_STET_ADDR         0xffc020a0UL
+
+void c5_uart_wait_empty(uint32_t uart_base_addr);
+void c5_uart_write_str(uint32_t uart_base_addr, const char *str, uint32_t len);
+void c5_uart_write_char(uint32_t uart_base_addr, const char c);
 
 #endif
