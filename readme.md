@@ -8,7 +8,7 @@ DE10-Nano development board.
 ## Build requirements
 
 Minimum:
-- GNU C/C++ cross toolchain for Arm processors supporting Cortex A9
+- GNU C/C++ cross toolchain for Arm processors supporting Cortex-A9
 - newlib library.  This is usually included with the above toolchain
 
 This sample includes the project file for Eclipse IDE for Embedded C/C++
