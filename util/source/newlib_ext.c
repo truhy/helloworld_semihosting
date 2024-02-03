@@ -21,7 +21,7 @@
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 	SOFTWARE.
 
-	Version: 20231201
+	Version: 20240202
 */
 #include <errno.h>
 #include <sys/stat.h>
@@ -31,72 +31,94 @@
 	#include "c5_uart.h"
 #endif
 
-#ifndef SEMIHOSTING
-	int _close(int file){
-	  return -1;
-	}
+#ifdef SEMIHOSTING
+	// ======================================
+	// Minimal implementation for Semihosting
+	// ======================================
 
-	int _fstat(int file, struct stat *st){
-	  st->st_mode = S_IFCHR;
-	  return 0;
+	int _kill(int pid, int sig){
+		errno = ENOSYS;  // Function not implemented
+		return -1;
 	}
+#else
+	// Process ID
+	#define __MYPID 1U
+
+	#ifdef TRU_PRINTF_UART
+		// ==========================================================================================
+		// Minimal implementation for a serial terminal (TTY) device based on newlib/libgloss sources
+		// ==========================================================================================
+
+		int _close(int fd){
+			return 0;  // Pretend to close
+		}
+
+		int _fstat(int fd, struct stat *buf){
+			buf->st_mode = S_IFCHR;   // Pretend to be a TTY
+			buf->st_blksize = 0;
+			return 0;
+		}
+
+		int _isatty(int fd){
+			return 1;  // Pretend to be a TTY
+		}
+
+		int _lseek(int fd, int ptr, int dir){
+			errno = ESPIPE;  // Invalid seek
+			return (ptr - 1);  // TTY is not seekable, return error
+		}
+
+		int _read(int fd, char *ptr, int len){
+			errno = EIO;  // Input/output error
+			return -1;  // Too complicated to implement read for TTY, return error
+		}
+
+		int _write(int fd, char *ptr, int len){
+			c5_uart_write_str(C5_UART0_BASE_ADDR, ptr, len);  // Re-target to UART controller
+			return len;
+		}
+	#else
+		// ==============================================================================
+		// Minimal implementation for no system based on newlib/libgloss/libnosys sources
+		// ==============================================================================
+
+		int _close(int fd){
+			errno = ENOSYS;  // Function not implemented
+			return -1;
+		}
+
+		int _fstat(int fd, struct stat *buf){
+			errno = ENOSYS;  // Function not implemented
+			return 1;
+		}
+
+		int _isatty(int fd){
+			errno = ENOSYS;  // Function not implemented
+			return 0;
+		}
+
+		int _lseek(int fd, int ptr, int dir){
+			errno = ENOSYS;  // Function not implemented
+			return -1;
+		}
+
+		int _read(int fd, char *ptr, int len){
+			errno = ENOSYS;  // Function not implemented
+			return -1;
+		}
+
+		int _write(int fd, char *ptr, int len){
+			errno = ENOSYS;  // Function not implemented
+			return -1;
+		}
+	#endif
 
 	int _getpid(){
-		return -1;
+		return __MYPID;
 	}
 
-	/*
-		Minimal implementation.
-		Query whether output stream is a terminal.
-	*/
-	int _isatty(int file){
-		switch (file){
-			case STDOUT_FILENO:
-			case STDERR_FILENO:
-			case STDIN_FILENO:
-				return 1;
-			default:
-				//errno = ENOTTY;
-				errno = EBADF;
-				return 0;
-		}
-	}
-
-	int _lseek(int file, int ptr, int dir){
+	int _kill(int pid, int sig){
+		if(pid == __MYPID) _exit(sig);
 		return 0;
 	}
-
-	int _read(int file, char *ptr, int len){
-		errno = EBADF;
-		return -1;
-	}
-
-	/*
-		Minimal implementation.
-		Re-target depending on compiler define.
-	*/
-	int _write(int file, char *ptr, int len){
-		#ifdef TRU_PRINTF_UART
-			// Re-target to UART controller
-
-			// Not stdout?
-			if(file != STDOUT_FILENO){
-				// Return error
-				errno = EBADF;
-				return -1;
-			}
-
-			c5_uart_write_str(C5_UART0_BASE_ADDR, ptr, len);
-
-			return len;
-		#else
-			errno = EBADF;
-			return -1;
-		#endif
-	}
 #endif
-
-int _kill(int pid, int sig){
-	errno = EINVAL;
-	return -1;
-}
